@@ -1,3 +1,0 @@
-sv-ttk
-cryptography
-pillow
