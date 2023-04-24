@@ -1,4 +1,4 @@
-from tkinter import Text,messagebox,ttk,Tk, PhotoImage,StringVar,IntVar,END,Button
+from tkinter import Text,messagebox,ttk,Tk,StringVar,IntVar,END
 import random
 from PIL import ImageTk, Image
 from cryptography.fernet import Fernet
@@ -61,6 +61,12 @@ paymentinfos = ('-----None-----',
 		)
 paymentinfo.set(paymentinfos[0])
 rate_of_items = []
+keyfile = open('Bills/userdb.sprz','rb')
+akey = keyfile.read(44)
+userdb = open('Bills/userdb.sprz','r')
+datalist = userdb.readlines()
+user = datalist[1]
+date_issue = datalist[2]
 
 #functions
 
@@ -98,21 +104,26 @@ ttk.OptionMenu(frame2, paymentinfo, *paymentinfos).grid(row=2,column=1,pady=5,pa
 frame3 = ttk.LabelFrame(master_frame, text='Article Details')
 frame3.grid(row=1,column=1,padx=10,pady=5)
 ttk.Label(frame3, text='Article Name: ').grid(row=0, column=0,pady=5,padx=5)
-ttk.Entry(frame3, textvariable=item_name,width=20).grid(row=0, column=1,pady=5,padx=5)
-ttk.Label(frame3, text='Quantity:     ').grid(row=1, column=0,pady=5,padx=5)
+item_name_entry = ttk.Entry(frame3, textvariable=item_name,width=20).grid(row=0, column=1,pady=5,padx=5)
+quantity_entry = ttk.Label(frame3, text='Quantity:     ').grid(row=1, column=0,pady=5,padx=5)
 ttk.Entry(frame3, textvariable=quantity,width=20).grid(row=1, column=1,pady=5,padx=5)
 ttk.Label(frame3, text='Rate:         ').grid(row=2, column=0,pady=5,padx=5)
-ttk.Entry(frame3, textvariable=rate,width=20).grid(row=2, column=1,pady=5,padx=5)
+rate_entry = ttk.Entry(frame3, textvariable=rate,width=20).grid(row=2, column=1,pady=5,padx=5)
 
 #lots of buttons
-def mkebil():
-	n=int(rate.get())
-	m=int(quantity.get())
-	mm = (quantity.get())*n
-	l=item_name.get()
+def mkebil(rate_entry,quantity_entry,item_name_entry):
+	n=int(rate_entry.get())
+	m=int(quantity_entry.get())
+	mm = (quantity_entry.get())*n
+	l=item_name_entry.get()
 	rate_of_items.append(mm)
-	if item_name.get()!='':
-		textarea.insert(END, f'\n{l} \t\t  {m}  \t\t {n}\n')
+	if l!='':
+			textarea.config(state='normal')
+			textarea.insert(END, f'\n{l} \t\t  {m}  \t\t {n}\n')
+			textarea.config(state='disabled')
+			rate_entry.set(0)
+			quantity_entry.set(0)
+			item_name_entry.set('')
 	else:
 		messagebox.showinfo('Error_404','No Item Inputed')
 
@@ -122,6 +133,7 @@ def clr():
 	item_name.set('')
 	rate.set(0)
 	quantity.set(0)
+	textarea.config(state='normal')
 	textarea.delete("1.0",END)
 	paymentinfo.set(paymentinfos[0])
 	rate_of_items.clear()
@@ -133,8 +145,6 @@ def exmsys():
 	if op > 0:
 		sprz.destroy()
 
-filed = open('Bills/.temp','rb')
-akey = filed.read()
 def svebil():
 	x = generate()
 	a = name.get()
@@ -149,7 +159,7 @@ def svebil():
 	else:
 		hehe = messagebox.askyesno('Save Bill', f'Do you want to save Bill with bill no. {x} of {a}')
 		if hehe > 0:
-			filer = open(f'Bills/bill {x} {a}.sprz', 'wt')
+			filer = open(f'Bills/bill {x} {a}.sprz', 'wt',encoding="utf8")
 			filer.write(f"	  Welcome Krishna's Retail Shop\n\nBill Number:		{x}\nCustomer Name:		{a}\nPhone Number:		{b}\nPayment Done In:		{c}\n\n\n{articles}\n\n=============================================\nTotal Bill Amount :		      {sum_of_rate}\n\n=============================================")
 			filer.close()
 			with open(f"Bills/bill {x} {a}.sprz", "rb") as file:
@@ -158,27 +168,25 @@ def svebil():
 			with open(f"Bills/bill {x} {a}.sprz", "wb") as wbf:
 				wbf.write(blah)
 			messagebox.showinfo('Bill Saved',f'Please review the Bill with number {x} of {a} in the Bills Folder.')
+			clr()
 
 def toggle_theme():
     if sv_ttk.get_theme() == "dark":
-        print("Setting theme to light")
         sv_ttk.use_light_theme()
-    elif sv_ttk.get_theme() == "light":
-        print("Setting theme to dark")
-        sv_ttk.use_dark_theme()
     else:
-        sv_ttk.set_theme('light')
+        sv_ttk.use_dark_theme()
 
 
 #buttons
 frame5 = ttk.LabelFrame(master_frame,text='Actions')
 frame5.grid(row=1,column=0,padx=10,pady=5)
-ttk.Button(frame5, text=' Add  ', command=lambda:mkebil()).grid(row=0, column=0,pady=5,padx=5)
+ttk.Button(frame5, text=' Add  ', command=lambda:mkebil(rate,quantity,item_name)).grid(row=0, column=0,pady=5,padx=5)
 ttk.Button(frame5, text=' Save ',command=lambda:svebil()).grid(row=1, column=0,pady=5,padx=5)
 ttk.Button(frame5, text=' Clear',command=lambda:clr()).grid(row=0, column=1,pady=5,padx=5)
 ttk.Button(frame5, text=' Exit ',command=lambda:exmsys()).grid(row=1, column=1,pady=5,padx=5)
 ttk.Button(frame5, text="Toggle Theme", command=toggle_theme).grid(row=2,column=0,padx=5,pady=5)
-ttk.Button(frame5,text=' About ',command=lambda:messagebox.showinfo('About','Made by : TheHackerClown\nVersion : 1.5(Updated)\nLicensed To : Userfropy')).grid(row=2,column=1,padx=5,pady=5)
-#LOOPING
+ttk.Button(frame5,text=' About ',command=lambda:messagebox.showinfo('About',f'Made by : TheHackerClown\nIssued : {date_issue}\nLicensed To : {user}')).grid(row=2,column=1,padx=5,pady=5)
 
+#LOOPING
+sv_ttk.set_theme('dark')
 sprz.mainloop()

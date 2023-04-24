@@ -4,7 +4,7 @@ import sv_ttk
 
 #setup Instance
 window = Tk()
-window.iconbitmap('IMG_Data/bill_assets/bill.ico')
+window.iconbitmap('IMG_Data/bill.ico')
 window.title('The Shopperz Bill Opener')
 window.resizable(False,False)
 frame = Frame(window).grid()
@@ -24,13 +24,16 @@ def openFile():
     ask = filedialog.askopenfilename(
         initialdir="Bills/",
         title='Open Sprz Bill File',
-        filetypes =(('Shopperz Files (Secure)','*.sprz'),('Text (Unsecure)', '*.txt'))
+        filetypes =(('Shopperz Files (Secure)','*.sprz'),('All Files', '*.*'))
         )
     file.set(ask)
-x= open('IMG_Data/bill_assets/compiler', 'r')
-code = x.read()
-akey = open('Bills/.temp','rb')
-key = akey.read()
+x= open('Bills/userdb.sprz', 'r')
+userdb = x.readlines()
+code = userdb[3]
+user = userdb[1]
+date_issue = userdb[2]
+akey = open('Bills/userdb.sprz','rb')
+key = akey.read(44)
 def wrtBil(file):
     path = file.get()
     if passc.get() == code:
@@ -66,4 +69,8 @@ open_button = ttk.Button(frame,text='OPEN',command=lambda: wrtBil(file)).grid(ro
 
 button = ttk.Button(frame, text="Toggle theme", command=sv_ttk.toggle_theme).grid(row=3,column=1,pady = 5)
 
+ttk.Button(frame,text='About',command=lambda:messagebox.showinfo('About',f'Made by : TheHackerClown\nIssued : {date_issue}\nLicensed To : {user}')).grid(row=3,column=3,pady = 5,padx=5)
+
+
+sv_ttk.set_theme('dark')
 window.mainloop()
